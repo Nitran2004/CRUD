@@ -1,0 +1,11 @@
+﻿@model CRUD.Models.Artista
+
+<h2>Eliminar Artista</h2>
+
+<p>¿Estás seguro que deseas eliminar el artista "@Model.Nombre"?</p>
+
+<form asp-action="DeleteConfirmed">
+    <input type="hidden" asp-for="ArtistasId" />
+    <button type="submit" class="btn btn-danger">Eliminar</button>
+    <a href="@Url.Action("Index")" class="btn btn-secondary">Cancelar</a>
+</form>

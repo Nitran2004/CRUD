@@ -1,0 +1,31 @@
+﻿@model IEnumerable<CRUD.Models.Artista>
+
+<h2>Lista de Artistas</h2>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Nombre</th>
+            <th>Género</th>
+            <th>Edad</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.Nombre</td>
+                <td>@item.Genero</td>
+                <td>@item.Edad</td>
+                <td>
+                    <a href="@Url.Action("Details", new { id = item.ArtistasId })" class="btn btn-info">Detalles</a>
+                    <a href="@Url.Action("Update", new { id = item.ArtistasId })" class="btn btn-warning">Actualizar</a>
+                    <a href="@Url.Action("Delete", new { id = item.ArtistasId })" class="btn btn-danger">Eliminar</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<a href="@Url.Action("Create")" class="btn btn-primary">Crear Nuevo Artista</a>

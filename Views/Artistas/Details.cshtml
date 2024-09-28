@@ -1,0 +1,10 @@
+﻿@model CRUD.Models.Artista
+
+<h2>Detalles del Artista</h2>
+
+<p><strong>Nombre:</strong> @Model.Nombre</p>
+<p><strong>Género:</strong> @Model.Genero</p>
+<p><strong>Edad:</strong> @Model.Edad</p>
+
+<a href="@Url.Action("Update", new { id = Model.ArtistasId })" class="btn btn-warning">Actualizar</a>
+<a href="@Url.Action("Index")" class="btn btn-secondary">Volver</a>
