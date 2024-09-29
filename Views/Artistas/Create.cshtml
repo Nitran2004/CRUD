@@ -4,18 +4,20 @@
 
 <form asp-action="Create">
     <div class="form-group">
-        <label for="Nombre">Nombre</label>
+        <label for="Nombre">Nombre </label>
         <input type="text" asp-for="Nombre" class="form-control" />
     </div>
     <div class="form-group">
-        <label for="Genero">Género</label>
+        <label for="Genero">Género </label>
         <input type="text" asp-for="Genero" class="form-control" />
     </div>
     <div class="form-group">
-        <label for="Edad">Edad</label>
+        <label for="Edad">Edad </label>
         <input type="text" asp-for="Edad" class="form-control" />
     </div>
-    <button type="submit" class="btn btn-primary">Guardar</button>
-</form>
 
-<a href="@Url.Action("Index")" class="btn btn-secondary">Volver</a>
+    <div class="form-group" style="margin-top: 20px;">
+        <button type="submit" class="btn btn-primary" style="margin-right: 15px;">Guardar</button>
+        <a href="@Url.Action("Index")" class="btn btn-secondary">Volver</a>
+    </div>
+</form>

@@ -6,7 +6,7 @@
     <thead>
         <tr>
             <th>Nombre</th>
-            <th>Género</th>
+            <th>Genero</th>
             <th>Edad</th>
             <th>Acciones</th>
         </tr>
@@ -15,9 +15,9 @@
         @foreach (var item in Model)
         {
             <tr>
-                <td>@item.Nombre</td>
-                <td>@item.Genero</td>
-                <td>@item.Edad</td>
+                <td>@(item.Nombre )</td>
+                <td>@(item.Genero )</td>
+                <td>@(item.Edad )</td>
                 <td>
                     <a href="@Url.Action("Details", new { id = item.ArtistasId })" class="btn btn-info">Detalles</a>
                     <a href="@Url.Action("Update", new { id = item.ArtistasId })" class="btn btn-warning">Actualizar</a>

@@ -1,16 +1,10 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-namespace CRUD.Models
+﻿namespace CRUD.Models
 {
     public class Artista
     {
-        [Key]
-        public int ArtistasId { get; set; } // Cambiado a 'public'
-
-        public string Nombre { get; set; }
-
-        public string Genero { get; set; }
-
-        public string Edad { get; set; }
+        public int ArtistasId { get; set; } // Ensure this property exists
+        public string? Nombre { get; set; } // Ensure this property exists
+        public string? Genero { get; set; } // Ensure this property exists
+        public string? Edad { get; set; } // Ensure this property exists
     }
 }

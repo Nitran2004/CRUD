@@ -3,20 +3,26 @@
 <h2>Actualizar Artista</h2>
 
 <form asp-action="Update">
-    <input type="hidden" asp-for="ArtistasId" />
     <div class="form-group">
-        <label for="Nombre">Nombre</label>
-        <input type="text" asp-for="Nombre" class="form-control" />
+        <label asp-for="Nombre" class="control-label"></label>
+        <input asp-for="Nombre" class="form-control" />
+        <span asp-validation-for="Nombre" class="text-danger"></span>
     </div>
     <div class="form-group">
-        <label for="Genero">Género</label>
-        <input type="text" asp-for="Genero" class="form-control" />
+        <label asp-for="Genero" class="control-label"></label>
+        <input asp-for="Genero" class="form-control" />
+        <span asp-validation-for="Genero" class="text-danger"></span>
     </div>
     <div class="form-group">
-        <label for="Edad">Edad</label>
-        <input type="text" asp-for="Edad" class="form-control" />
+        <label asp-for="Edad" class="control-label"></label>
+        <input asp-for="Edad" class="form-control" />
+        <span asp-validation-for="Edad" class="text-danger"></span>
     </div>
-    <button type="submit" class="btn btn-primary">Guardar Cambios</button>
-</form>
 
-<a href="@Url.Action("Index")" class="btn btn-secondary">Volver</a>
+    <!-- Separación entre el último campo de texto y los botones -->
+    <div class="form-group mt-4">
+        <input type="hidden" asp-for="ArtistasId" />
+        <button type="submit" class="btn btn-primary">Guardar</button>
+        <a asp-action="Index" class="btn btn-secondary ml-2">Volver a la lista</a>
+    </div>
+</form>

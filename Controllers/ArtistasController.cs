@@ -1,6 +1,7 @@
-﻿using CRUD.Models;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using CRUD.Models; 
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace CRUD.Controllers
@@ -14,13 +15,22 @@ namespace CRUD.Controllers
             _context = context;
         }
 
-        // GET: Artistas (Read - List all artists)
-        public async Task<IActionResult> Index()
+        // GET: Artistas
+        public async Task<IActionResult> Index(string buscar)
         {
-            return View(await _context.Artistas.ToListAsync());
+            IQueryable<Artista> artistasQuery = _context.Artistas;
+
+            if (!string.IsNullOrEmpty(buscar))
+            {
+                artistasQuery = artistasQuery.Where(a => a.Nombre.Contains(buscar));
+            }
+
+            var artistas = await artistasQuery.ToListAsync();
+
+            return View(artistas);
         }
 
-        // GET: Artistas/Details/5 (Read - Details of a specific artist)
+        // GET: Artistas/Details/5
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -38,16 +48,16 @@ namespace CRUD.Controllers
             return View(artista);
         }
 
-        // GET: Artistas/Create (Create - Show form to create a new artist)
+        // GET: Artistas/Create
         public IActionResult Create()
         {
             return View();
         }
 
-        // POST: Artistas/Create (Create - Save the new artist)
+        // POST: Artistas/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("ArtistasId,Nombre,Genero,Edad")] Artista artista)
+        public async Task<IActionResult> Create([Bind("ID,Nombre,Genero,Edad")] Artista artista)
         {
             if (ModelState.IsValid)
             {
@@ -58,7 +68,8 @@ namespace CRUD.Controllers
             return View(artista);
         }
 
-        // GET: Artistas/Edit/5 (Update - Show form to edit an existing artist)
+        // GET: Artistas/Edit/5
+        // GET: Artistas/Update/5
         public async Task<IActionResult> Update(int? id)
         {
             if (id == null)
@@ -74,7 +85,7 @@ namespace CRUD.Controllers
             return View(artista);
         }
 
-        // POST: Artistas/Edit/5 (Update - Save the edited artist)
+        // POST: Artistas/Update/5
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Update(int id, [Bind("ArtistasId,Nombre,Genero,Edad")] Artista artista)
@@ -107,7 +118,8 @@ namespace CRUD.Controllers
             return View(artista);
         }
 
-        // GET: Artistas/Delete/5 (Delete - Show confirmation page)
+
+        // GET: Artistas/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -125,14 +137,20 @@ namespace CRUD.Controllers
             return View(artista);
         }
 
-        // POST: Artistas/Delete/5 (Delete - Confirm delete)
-        [HttpPost, ActionName("Delete")]
+        // POST: Artistas/Delete/5
+        [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
+        public async Task<IActionResult> Delete(int id)
         {
             var artista = await _context.Artistas.FindAsync(id);
+            if (artista == null)
+            {
+                return NotFound();
+            }
+
             _context.Artistas.Remove(artista);
             await _context.SaveChangesAsync();
+
             return RedirectToAction(nameof(Index));
         }
 
