@@ -3,9 +3,11 @@ using Microsoft.EntityFrameworkCore;
 using CRUD.Models; 
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 
 namespace CRUD.Controllers
 {
+    [Authorize]
     public class ArtistasController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -15,9 +17,11 @@ namespace CRUD.Controllers
             _context = context;
         }
 
-        // GET: Artistas
-        public async Task<IActionResult> Index(string buscar)
+        [Authorize]
+        public async Task<IActionResult> Index(string buscar, string returnurl = null)
         {
+            ViewData["ReturnUrl"] = returnurl;
+
             IQueryable<Artista> artistasQuery = _context.Artistas;
 
             if (!string.IsNullOrEmpty(buscar))
@@ -30,16 +34,17 @@ namespace CRUD.Controllers
             return View(artistas);
         }
 
-        // GET: Artistas/Details/5
+        ///[Authorize]
         public async Task<IActionResult> Details(int? id)
         {
+            //ViewData["ReturnUrl"] = returnurl;
+
             if (id == null)
             {
                 return NotFound();
             }
 
-            var artista = await _context.Artistas
-                .FirstOrDefaultAsync(a => a.ArtistasId == id);
+            var artista = await _context.Artistas.FirstOrDefaultAsync(a => a.ArtistasId == id);
             if (artista == null)
             {
                 return NotFound();
@@ -47,18 +52,22 @@ namespace CRUD.Controllers
 
             return View(artista);
         }
+        [Authorize]
 
-        // GET: Artistas/Create
-        public IActionResult Create()
+        public IActionResult Create(string returnUrl = null)
         {
-            return View();
+            ViewData["ReturnUrl"] = returnUrl; // Guarda el valor de returnUrl si es necesario.
+            return View(); // Retorna la vista.
         }
 
-        // POST: Artistas/Create
+
+        ///[Authorize]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("ID,Nombre,Genero,Edad")] Artista artista)
         {
+            //ViewData["ReturnUrl"] = returnurl;
+
             if (ModelState.IsValid)
             {
                 _context.Add(artista);
@@ -68,10 +77,11 @@ namespace CRUD.Controllers
             return View(artista);
         }
 
-        // GET: Artistas/Edit/5
-        // GET: Artistas/Update/5
+        ///[Authorize]
         public async Task<IActionResult> Update(int? id)
         {
+           // ViewData["ReturnUrl"] = returnurl;
+
             if (id == null)
             {
                 return NotFound();
@@ -85,11 +95,13 @@ namespace CRUD.Controllers
             return View(artista);
         }
 
-        // POST: Artistas/Update/5
+        ///[Authorize]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Update(int id, [Bind("ArtistasId,Nombre,Genero,Edad")] Artista artista)
         {
+            //ViewData["ReturnUrl"] = returnurl;
+
             if (id != artista.ArtistasId)
             {
                 return NotFound();
@@ -118,17 +130,17 @@ namespace CRUD.Controllers
             return View(artista);
         }
 
-
-        // GET: Artistas/Delete/5
+        [Authorize]
         public async Task<IActionResult> Delete(int? id)
         {
+            ////ViewData["ReturnUrl"] = returnurl;
+
             if (id == null)
             {
                 return NotFound();
             }
 
-            var artista = await _context.Artistas
-                .FirstOrDefaultAsync(a => a.ArtistasId == id);
+            var artista = await _context.Artistas.FirstOrDefaultAsync(a => a.ArtistasId == id);
             if (artista == null)
             {
                 return NotFound();
@@ -137,11 +149,13 @@ namespace CRUD.Controllers
             return View(artista);
         }
 
-        // POST: Artistas/Delete/5
+        //[Authorize]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(int id)
         {
+            //ViewData["ReturnUrl"] = returnurl;
+
             var artista = await _context.Artistas.FindAsync(id);
             if (artista == null)
             {
@@ -159,4 +173,5 @@ namespace CRUD.Controllers
             return _context.Artistas.Any(e => e.ArtistasId == id);
         }
     }
+
 }

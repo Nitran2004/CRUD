@@ -1,4 +1,5 @@
 using CRUD.Models;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -7,6 +8,19 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<ApplicationDbContext>(opciones => 
 opciones.UseSqlServer(builder.Configuration.GetConnectionString("ConexionSql"))
 );
+
+// Agregar el servicio Identity a la aplicación
+builder.Services.AddIdentity<IdentityUser, IdentityRole>()
+    .AddEntityFrameworkStores<ApplicationDbContext>()
+    .AddDefaultTokenProviders();
+
+
+// Configuración de la URL de retorno al acceder
+builder.Services.ConfigureApplicationCookie(options =>
+{
+    options.LoginPath = new PathString("/Cuentas/Acceso");
+    options.AccessDeniedPath = new PathString("/Cuentas/Denegado");
+});
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
@@ -26,6 +40,8 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
+// Se agrega la autenticación
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllerRoute(
