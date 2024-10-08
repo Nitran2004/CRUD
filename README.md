@@ -15,7 +15,7 @@ Para ejecutar este proyecto necesitas:
 
 - [ASP.NET Core](https://dotnet.microsoft.com/download/dotnet-core)
 - [Entity Framework](https://docs.microsoft.com/en-us/ef/core/)
-- [SQL Server](https://www.microsoft.com/en-us/sql-server/sql-server-downloads)
+- [SQL Server](https://www.microsoft.com/en-us/sql-server/sql-server-downloads)(no necesario)
   
 ## Instalación
 
