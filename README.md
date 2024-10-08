@@ -43,14 +43,10 @@ ASP.NET Core para el backend y manejo de autenticación.
 Entity Framework para la gestión de la base de datos.
 Bootstrap para el diseño responsivo del frontend.
 
-## Contribución
-Si deseas contribuir al proyecto, sigue estos pasos:
+## Referencias
 
-Haz un fork del proyecto.
-Crea una rama para tu funcionalidad (git checkout -b nueva-funcionalidad).
-Realiza tus cambios y haz un commit (git commit -m 'Agrega nueva funcionalidad').
-Sube tu rama (git push origin nueva-funcionalidad).
-Abre un Pull Request.
+https://udla.udemy.com/course/identity-autenticacion-autorizacion/learn/lecture/30958306#overview
+
 ## Licencia
 Este proyecto está licenciado bajo la licencia MIT. Ver el archivo LICENSE para más detalles.
 
