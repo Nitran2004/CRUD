@@ -7,7 +7,7 @@ Este proyecto es una aplicación web que implementa un sistema de autenticación
 - Sistema de autenticación y autorización.
 - URLs protegidas que requieren iniciar sesión para acceder a cualquier funcionalidad CRUD.
 - Redirección automática al login si el usuario intenta acceder a recursos sin estar autenticado.
-- Gestión de usuarios y roles dentro del sistema.
+- Gestión de usuarios del sistema.
 
 ## Requisitos
 
