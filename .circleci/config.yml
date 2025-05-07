@@ -1,5 +1,9 @@
 version: 2.1
 
+# Definimos los orbs que vamos a utilizar
+orbs:
+  slack: circleci/slack@4.12.1
+
 # Definimos los jobs (tareas)
 jobs:
   build:
@@ -19,24 +23,84 @@ jobs:
           root: .
           paths:
             - .
+      # Notificación de éxito o fallo de la compilación
+      - slack/notify:
+          event: fail
+          template: basic_fail_1
+          channel: 'ci-notifications'
+      - slack/notify:
+          event: pass
+          template: success_tagged_deploy_1
+          channel: 'ci-notifications'
 
   test:
+    docker:
+      - image: mcr.microsoft.com/dotnet/sdk:6.0
+    # Configuramos paralelismo - ejecuta este job en 4 instancias paralelas
+    parallelism: 4
+    steps:
+      - attach_workspace:
+          at: .
+      - run:
+          name: Ejecutar pruebas en paralelo
+          command: |
+            # Obtiene todos los proyectos de prueba
+            PROJECTS=$(find . -name "*Tests.csproj" -o -name "*Test.csproj")
+            
+            # Divide los proyectos entre las instancias paralelas
+            echo $PROJECTS | circleci tests split --split-by=timings > /tmp/tests-to-run
+            
+            # Ejecuta las pruebas asignadas a esta instancia
+            while read -r project; do
+              dotnet test "$project" --configuration Release --no-build --logger "trx;LogFileName=test-results.trx"
+            done < /tmp/tests-to-run
+      
+      # Almacenar resultados de pruebas
+      - store_test_results:
+          path: TestResults
+          
+      # Notificación de éxito o fallo de las pruebas
+      - slack/notify:
+          event: fail
+          template: basic_fail_1
+          channel: 'ci-notifications'
+      - slack/notify:
+          event: pass
+          template: success_tagged_deploy_1
+          channel: 'ci-notifications'
+
+  deploy:
     docker:
       - image: mcr.microsoft.com/dotnet/sdk:6.0
     steps:
       - attach_workspace:
           at: .
       - run:
-          name: Ejecutar pruebas
+          name: Publicar aplicación
           command: |
-            dotnet test --configuration Release --no-build
+            dotnet publish --configuration Release --no-build --output ./publish
+      # Notificación de éxito o fallo del despliegue
+      - slack/notify:
+          event: fail
+          template: basic_fail_1
+          channel: 'ci-notifications'
+      - slack/notify:
+          event: pass
+          template: success_tagged_deploy_1
+          channel: 'ci-notifications'
 
 # Definimos el workflow (flujo de trabajo)
 workflows:
   version: 2
-  build-and-test:
+  build-test-deploy:
     jobs:
       - build
       - test:
           requires:
             - build
+      - deploy:
+          requires:
+            - test
+          filters:
+            branches:
+              only: main
