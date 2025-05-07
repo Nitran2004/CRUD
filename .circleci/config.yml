@@ -19,16 +19,20 @@ jobs:
           root: .
           paths:
             - .
-      # Notificación simple mediante commandos integrados
+      # Notificaciones explícitas por email
       - run:
-          name: Notificar resultado de build
+          name: Notificar éxito de build por email
           command: |
-            echo "Build completado con éxito"
+            if [ -n "$CIRCLE_BRANCH" ]; then
+              echo "Build exitoso en la rama $CIRCLE_BRANCH" | mail -s "CircleCI: Build exitoso" "$CIRCLE_USERNAME@users.noreply.github.com"
+            fi
           when: on_success
       - run:
-          name: Notificar fallo de build
+          name: Notificar fallo de build por email
           command: |
-            echo "Build falló"
+            if [ -n "$CIRCLE_BRANCH" ]; then
+              echo "Build fallido en la rama $CIRCLE_BRANCH. Ver detalles en: ${CIRCLE_BUILD_URL}" | mail -s "CircleCI: Build fallido" "$CIRCLE_USERNAME@users.noreply.github.com"
+            fi
           when: on_fail
 
   test:
@@ -39,6 +43,11 @@ jobs:
     steps:
       - attach_workspace:
           at: .
+      - run:
+          name: Instalar herramientas de email
+          command: |
+            apt-get update
+            apt-get install -y mailutils
       - run:
           name: Ejecutar pruebas en paralelo
           command: |
@@ -58,16 +67,20 @@ jobs:
       - store_test_results:
           path: TestResults
           
-      # Notificación simple mediante comandos integrados
+      # Notificaciones explícitas por email
       - run:
-          name: Notificar resultado de pruebas
+          name: Notificar éxito de pruebas por email
           command: |
-            echo "Pruebas completadas con éxito"
+            if [ -n "$CIRCLE_BRANCH" ]; then
+              echo "Pruebas exitosas en la rama $CIRCLE_BRANCH" | mail -s "CircleCI: Pruebas exitosas" "$CIRCLE_USERNAME@users.noreply.github.com"
+            fi
           when: on_success
       - run:
-          name: Notificar fallo de pruebas
+          name: Notificar fallo de pruebas por email
           command: |
-            echo "Las pruebas fallaron"
+            if [ -n "$CIRCLE_BRANCH" ]; then
+              echo "Pruebas fallidas en la rama $CIRCLE_BRANCH. Ver detalles en: ${CIRCLE_BUILD_URL}" | mail -s "CircleCI: Pruebas fallidas" "$CIRCLE_USERNAME@users.noreply.github.com"
+            fi
           when: on_fail
 
   deploy:
@@ -77,19 +90,28 @@ jobs:
       - attach_workspace:
           at: .
       - run:
+          name: Instalar herramientas de email
+          command: |
+            apt-get update
+            apt-get install -y mailutils
+      - run:
           name: Publicar aplicación
           command: |
             dotnet publish --configuration Release --no-build --output ./publish
-      # Notificación simple mediante comandos integrados
+      # Notificaciones explícitas por email
       - run:
-          name: Notificar resultado de despliegue
+          name: Notificar éxito de despliegue por email
           command: |
-            echo "Despliegue completado con éxito"
+            if [ -n "$CIRCLE_BRANCH" ]; then
+              echo "Despliegue exitoso en la rama $CIRCLE_BRANCH" | mail -s "CircleCI: Despliegue exitoso" "$CIRCLE_USERNAME@users.noreply.github.com"
+            fi
           when: on_success
       - run:
-          name: Notificar fallo de despliegue
+          name: Notificar fallo de despliegue por email
           command: |
-            echo "El despliegue falló"
+            if [ -n "$CIRCLE_BRANCH" ]; then
+              echo "Despliegue fallido en la rama $CIRCLE_BRANCH. Ver detalles en: ${CIRCLE_BUILD_URL}" | mail -s "CircleCI: Despliegue fallido" "$CIRCLE_USERNAME@users.noreply.github.com"
+            fi
           when: on_fail
 
 # Definimos el workflow (flujo de trabajo)
@@ -107,9 +129,3 @@ workflows:
           filters:
             branches:
               only: main
-
-# Configuración de notificaciones por email (integradas en CircleCI)
-notify:
-  webhooks:
-    # Una lista de webhooks a los que enviar notificaciones cuando se produce un cambio en el estado del build
-    - url: https://example.com/hooks/circleci
