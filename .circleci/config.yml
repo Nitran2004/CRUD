@@ -1,5 +1,9 @@
 version: 2.1
 
+orbs:
+  # Orb oficial para enviar notificaciones por email
+  jira: circleci/jira@2.1.0
+
 # Definimos los jobs (tareas)
 jobs:
   build:
@@ -19,25 +23,43 @@ jobs:
           root: .
           paths:
             - .
+      # Paso simple para notificación
+      - run:
+          name: Notificar estado de build
+          command: |
+            # Este comando simula el envío de una notificación
+            echo "Notificando que el build ha sido completado con estado: $CIRCLE_JOB"
+            # En un entorno real, aquí podrías usar curl para enviar una notificación a un webhook
+            # curl -X POST https://ejemplo-webhook.com/notificar -d "job=build&status=success&branch=$CIRCLE_BRANCH"
 
   test:
     docker:
       - image: mcr.microsoft.com/dotnet/sdk:6.0
-    # Configuramos paralelismo - ejecuta este job en 2 instancias paralelas (reducido para simplificar)
+    # Configuramos paralelismo - ejecuta este job en 2 instancias paralelas
     parallelism: 2
     steps:
       - attach_workspace:
           at: .
       - run:
-          name: Crear directorio de pruebas demo
+          name: Ejecutar pruebas simuladas en paralelo
           command: |
+            echo "Ejecutando prueba en nodo $CIRCLE_NODE_INDEX de $CIRCLE_NODE_TOTAL"
             mkdir -p TestResults
-            echo "Simulando pruebas exitosas" > TestResults/resultados.txt
+            echo "Resultado de prueba en nodo $CIRCLE_NODE_INDEX" > "TestResults/resultado-$CIRCLE_NODE_INDEX.txt"
+            sleep 5  # Simula tiempo de ejecución de pruebas
       
       # Almacenar resultados de pruebas
       - store_artifacts:
           path: TestResults
           destination: test-results
+          
+      # Paso simple para notificación
+      - run:
+          name: Notificar estado de pruebas
+          command: |
+            echo "Notificando que las pruebas han sido completadas con estado: $CIRCLE_JOB"
+            # En un entorno real, aquí podrías usar curl para enviar una notificación a un webhook
+            # curl -X POST https://ejemplo-webhook.com/notificar -d "job=test&status=success&branch=$CIRCLE_BRANCH"
 
 # Definimos el workflow (flujo de trabajo)
 workflows:
@@ -48,3 +70,14 @@ workflows:
       - test:
           requires:
             - build
+
+# Configuración de notificaciones
+notify:
+  # Cuando se completa un workflow con éxito
+  branches:
+    only:
+      - main
+      - develop
+  webhooks:
+    # Una lista de URLs que se llamarán cuando cambie el estado del build
+    - url: https://webhook.ejemplo.com/circleci-notificaciones
