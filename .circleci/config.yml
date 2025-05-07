@@ -1,9 +1,5 @@
 version: 2.1
 
-# Definimos los orbs que vamos a utilizar
-orbs:
-  slack: circleci/slack@4.12.1
-
 # Definimos los jobs (tareas)
 jobs:
   build:
@@ -23,15 +19,17 @@ jobs:
           root: .
           paths:
             - .
-      # Notificación de éxito o fallo de la compilación
-      - slack/notify:
-          event: fail
-          template: basic_fail_1
-          channel: 'ci-notifications'
-      - slack/notify:
-          event: pass
-          template: success_tagged_deploy_1
-          channel: 'ci-notifications'
+      # Notificación simple mediante commandos integrados
+      - run:
+          name: Notificar resultado de build
+          command: |
+            echo "Build completado con éxito"
+          when: on_success
+      - run:
+          name: Notificar fallo de build
+          command: |
+            echo "Build falló"
+          when: on_fail
 
   test:
     docker:
@@ -48,10 +46,11 @@ jobs:
             PROJECTS=$(find . -name "*Tests.csproj" -o -name "*Test.csproj")
             
             # Divide los proyectos entre las instancias paralelas
-            echo $PROJECTS | circleci tests split --split-by=timings > /tmp/tests-to-run
+            echo $PROJECTS | tr ' ' '\n' | circleci tests split --split-by=timings > /tmp/tests-to-run
             
             # Ejecuta las pruebas asignadas a esta instancia
             while read -r project; do
+              echo "Ejecutando pruebas en: $project"
               dotnet test "$project" --configuration Release --no-build --logger "trx;LogFileName=test-results.trx"
             done < /tmp/tests-to-run
       
@@ -59,15 +58,17 @@ jobs:
       - store_test_results:
           path: TestResults
           
-      # Notificación de éxito o fallo de las pruebas
-      - slack/notify:
-          event: fail
-          template: basic_fail_1
-          channel: 'ci-notifications'
-      - slack/notify:
-          event: pass
-          template: success_tagged_deploy_1
-          channel: 'ci-notifications'
+      # Notificación simple mediante comandos integrados
+      - run:
+          name: Notificar resultado de pruebas
+          command: |
+            echo "Pruebas completadas con éxito"
+          when: on_success
+      - run:
+          name: Notificar fallo de pruebas
+          command: |
+            echo "Las pruebas fallaron"
+          when: on_fail
 
   deploy:
     docker:
@@ -79,15 +80,17 @@ jobs:
           name: Publicar aplicación
           command: |
             dotnet publish --configuration Release --no-build --output ./publish
-      # Notificación de éxito o fallo del despliegue
-      - slack/notify:
-          event: fail
-          template: basic_fail_1
-          channel: 'ci-notifications'
-      - slack/notify:
-          event: pass
-          template: success_tagged_deploy_1
-          channel: 'ci-notifications'
+      # Notificación simple mediante comandos integrados
+      - run:
+          name: Notificar resultado de despliegue
+          command: |
+            echo "Despliegue completado con éxito"
+          when: on_success
+      - run:
+          name: Notificar fallo de despliegue
+          command: |
+            echo "El despliegue falló"
+          when: on_fail
 
 # Definimos el workflow (flujo de trabajo)
 workflows:
@@ -104,3 +107,9 @@ workflows:
           filters:
             branches:
               only: main
+
+# Configuración de notificaciones por email (integradas en CircleCI)
+notify:
+  webhooks:
+    # Una lista de webhooks a los que enviar notificaciones cuando se produce un cambio en el estado del build
+    - url: https://example.com/hooks/circleci
