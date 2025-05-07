@@ -1,87 +1,42 @@
 version: 2.1
 
-# Definimos algunos comandos reutilizables
-commands:
-  install_dependencies:
-    description: "Instala las dependencias del proyecto"
-    steps:
-      - run:
-          name: Instalar dependencias
-          command: |
-            echo "Instalando dependencias..."
-            # Aquí iría el comando real para instalar dependencias, por ejemplo:
-            # npm install o pip install -r requirements.txt
-
 # Definimos los jobs (tareas)
 jobs:
   build:
     docker:
-      - image: cimg/node:16.13.0
+      - image: mcr.microsoft.com/dotnet/sdk:6.0
     steps:
       - checkout
-      - install_dependencies
+      - run:
+          name: Restaurar dependencias
+          command: |
+            dotnet restore
       - run:
           name: Construir aplicación
           command: |
-            echo "Construyendo la aplicación..."
-            # Por ejemplo: npm run build
+            dotnet build --configuration Release --no-restore
       - persist_to_workspace:
           root: .
           paths:
             - .
 
-  lint:
-    docker:
-      - image: cimg/node:16.13.0
-    steps:
-      - attach_workspace:
-          at: .
-      - run:
-          name: Ejecutar linter
-          command: |
-            echo "Ejecutando análisis de código..."
-            # Por ejemplo: npm run lint
-
   test:
     docker:
-      - image: cimg/node:16.13.0
+      - image: mcr.microsoft.com/dotnet/sdk:6.0
     steps:
       - attach_workspace:
           at: .
       - run:
           name: Ejecutar pruebas
           command: |
-            echo "Ejecutando pruebas unitarias..."
-            # Por ejemplo: npm test
+            dotnet test --configuration Release --no-build
 
-  deploy:
-    docker:
-      - image: cimg/node:16.13.0
-    steps:
-      - attach_workspace:
-          at: .
-      - run:
-          name: Desplegar aplicación
-          command: |
-            echo "Desplegando la aplicación..."
-            # Por ejemplo: npm run deploy
-
-# Definimos los workflows (flujos de trabajo)
+# Definimos el workflow (flujo de trabajo)
 workflows:
   version: 2
-  build-test-deploy:
+  build-and-test:
     jobs:
       - build
-      - lint:
-          requires:
-            - build
       - test:
           requires:
             - build
-      - deploy:
-          requires:
-            - lint
-            - test
-          filters:
-            branches:
-              only: main
