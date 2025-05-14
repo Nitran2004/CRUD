@@ -1,0 +1,89 @@
+version: 2.1
+
+# Definimos los jobs (tareas)
+jobs:
+  build:
+    docker:
+      - image: mcr.microsoft.com/dotnet/sdk:6.0
+    steps:
+      - checkout
+      - run:
+          name: Restaurar dependencias
+          command: |
+            dotnet restore || echo "Restauración fallida pero continuamos"
+      - run:
+          name: Construir aplicación
+          command: |
+            dotnet build --configuration Release || echo "Build fallido pero continuamos para propósitos de demostración"
+      - persist_to_workspace:
+          root: .
+          paths:
+            - .
+      # Notificación a webhook.site
+      - run:
+          name: Notificar éxito de build
+          command: |
+            curl -X POST https://webhook.site/da3311f0-45e1-4bd3-93bf-1b5a69ce5943 \
+              -H "Content-Type: application/json" \
+              -d "{\"job\":\"build\",\"status\":\"success\",\"branch\":\"$CIRCLE_BRANCH\"}"
+          when: on_success
+      - run:
+          name: Notificar fallo de build
+          command: |
+            curl -X POST https://webhook.site/da3311f0-45e1-4bd3-93bf-1b5a69ce5943 \
+              -H "Content-Type: application/json" \
+              -d "{\"job\":\"build\",\"status\":\"failure\",\"branch\":\"$CIRCLE_BRANCH\"}"
+          when: on_fail
+
+  test:
+    docker:
+      - image: mcr.microsoft.com/dotnet/sdk:6.0
+    # Configuramos paralelismo - ejecuta este job en 2 instancias paralelas
+    parallelism: 2
+    steps:
+      - attach_workspace:
+          at: .
+      - run:
+          name: Ejecutar pruebas simuladas en paralelo
+          command: |
+            echo "Ejecutando prueba en nodo $CIRCLE_NODE_INDEX de $CIRCLE_NODE_TOTAL"
+            mkdir -p TestResults
+            echo "Resultado de prueba en nodo $CIRCLE_NODE_INDEX" > "TestResults/resultado-$CIRCLE_NODE_INDEX.txt"
+            sleep 5  # Simula tiempo de ejecución de pruebas
+      
+      # Almacenar resultados de pruebas
+      - store_artifacts:
+          path: TestResults
+          destination: test-results
+          
+      # Notificación a webhook.site
+      - run:
+          name: Notificar éxito de pruebas
+          command: |
+            curl -X POST https://webhook.site/da3311f0-45e1-4bd3-93bf-1b5a69ce5943 \
+              -H "Content-Type: application/json" \
+              -d "{\"job\":\"test\",\"status\":\"success\",\"node\":\"$CIRCLE_NODE_INDEX\",\"branch\":\"$CIRCLE_BRANCH\"}"
+          when: on_success
+      - run:
+          name: Notificar fallo de pruebas
+          command: |
+            curl -X POST https://webhook.site/da3311f0-45e1-4bd3-93bf-1b5a69ce5943 \
+              -H "Content-Type: application/json" \
+              -d "{\"job\":\"test\",\"status\":\"failure\",\"node\":\"$CIRCLE_NODE_INDEX\",\"branch\":\"$CIRCLE_BRANCH\"}"
+          when: on_fail
+
+# Definimos el workflow (flujo de trabajo)
+workflows:
+  version: 2
+  build-test-deploy:
+    jobs:
+      - build
+      - test:
+          requires:
+            - build
+
+# Configuración adicional de notificaciones a nivel de workflow
+notify:
+  webhooks:
+    # Webhook que se llamará cuando cambie el estado del workflow completo
+    - url: https://webhook.site/da3311f0-45e1-4bd3-93bf-1b5a69ce5943
